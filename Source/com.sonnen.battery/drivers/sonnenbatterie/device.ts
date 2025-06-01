@@ -1,16 +1,14 @@
-import Homey from 'homey';
 import axios from 'axios';
 import _ from 'underscore';
 import { SonnenBatterieClient } from '../../Service/SonnenBatterieClient';
+import { SonnenDevice } from '../../lib/SonnenDevice';
 
-class BatteryDevice extends Homey.Device {
-  state: any;
+module.exports = class BatteryDevice extends SonnenDevice {
+  private state: any;
+  private updateIntervalId: NodeJS.Timeout | undefined;
 
-  /**
-   * onInit is called when the device is initialized.
-   */
   async onInit() {
-    this.log('BatteryDevice has been initialized');
+    super.onInit();
 
     await this.gracefullyAddOrRemoveCapabilities();
     this.registerResetMetersButton();
@@ -33,12 +31,41 @@ class BatteryDevice extends Homey.Device {
     this.state = await this.loadLatestState(batteryAuthToken, this.state, this.getStore().autodiscovery ?? true);
 
     // Pull battery status
-    this.homey.setInterval(async () => {
+    this.updateIntervalId = this.homey.setInterval(async () => {
       this.state = await this.loadLatestState(batteryAuthToken, this.state, this.getStore().autodiscovery ?? true);
     }, batteryPullInterval * 1000);
   }
 
+  async onDeleted() {
+    if (this.updateIntervalId) {
+      this.homey.clearInterval(this.updateIntervalId);
+    }
+    super.onDeleted();
+  }
 
+  async onSettings({
+    oldSettings,
+    newSettings,
+    changedKeys,
+  }: {
+    oldSettings: { [key: string]: boolean | string | number | undefined | null; };
+    newSettings: { [key: string]: boolean | string | number | undefined | null; };
+    changedKeys: string[];
+  }): Promise<string | void> {
+    super.onSettings({ oldSettings, newSettings, changedKeys });
+
+    if (_.contains(changedKeys, "device-ip")){
+      var newDeviceIp = newSettings["device-ip"];
+      this.log("Settings", "IP", newDeviceIp);
+      this.setStoreValue('lanip', newDeviceIp);
+    };
+
+    if (_.contains(changedKeys, "device-discovery")){
+      var blnUseAutoDisovery = newSettings["device-discovery"];
+      this.log("Settings", "AutoDiscovery", blnUseAutoDisovery);
+      this.setStoreValue('autodiscovery', blnUseAutoDisovery);
+    };
+  }
 
   /**
    * Homey SDK3's new Date() is always in UTC but SonnenBatterie timestamps are local,
@@ -114,7 +141,7 @@ class BatteryDevice extends Homey.Device {
     if (this.hasCapability('autarky_capability') === false) {
       await this.addCapability('autarky_capability');
     }
-    
+
     if (this.hasCapability('battery_charging_state') === false) {
       await this.addCapability('battery_charging_state');
     }
@@ -128,62 +155,11 @@ class BatteryDevice extends Homey.Device {
     if (this.hasCapability('meter_power.discharged') === false) {
       await this.addCapability('meter_power.discharged');
     }
-    
-  }
+    // add with 1.6
+    if (this.hasCapability('meter_power') === false) {
+      await this.addCapability('meter_power');
+    }
 
-  /**
-   * onAdded is called when the user adds the device, called just after pairing.
-   */
-  async onAdded() {
-    this.log('BatteryDevice has been added');
-  }
-
-  /**
-   * onSettings is called when the user updates the device's settings.
-   * @param {object} event the onSettings event data
-   * @param {object} event.oldSettings The old settings object
-   * @param {object} event.newSettings The new settings object
-   * @param {string[]} event.changedKeys An array of keys changed since the previous version
-   * @returns {Promise<string|void>} return a custom message that will be displayed
-   */
-  async onSettings({
-    oldSettings,
-    newSettings,
-    changedKeys,
-  }: {
-    oldSettings: { [key: string]: boolean | string | number | undefined | null; };
-    newSettings: { [key: string]: boolean | string | number | undefined | null; };
-    changedKeys: string[];
-  }): Promise<string | void> {
-    this.log('BatteryDevice settings where changed');
-
-    if (_.contains(changedKeys, "device-ip")){
-      var newDeviceIp = newSettings["device-ip"];
-      this.log("Settings", "IP", newDeviceIp);
-      this.setStoreValue('lanip', newDeviceIp);
-    };
-
-    if (_.contains(changedKeys, "device-discovery")){
-      var blnUseAutoDisovery = newSettings["device-discovery"];
-      this.log("Settings", "AutoDiscovery", blnUseAutoDisovery);
-      this.setStoreValue('autodiscovery', blnUseAutoDisovery);
-    };
-  }
-
-  /**
-   * onRenamed is called when the user updates the device's name.
-   * This method can be used this to synchronise the name to the device.
-   * @param {string} name The new name
-   */
-  async onRenamed(name: string) {
-    this.log('BatteryDevice was renamed');
-  }
-
-  /**
-   * onDeleted is called when the user deleted the device.
-   */
-  async onDeleted() {
-    this.log('BatteryDevice has been deleted');
   }
 
   private async loadLatestState(
@@ -239,6 +215,7 @@ class BatteryDevice extends Homey.Device {
         lastUpdate: currentUpdate, 
         totalDailyProduction_Wh:      this.aggregateDailyTotal(lastState.totalDailyProduction_Wh,      statusJson.Production_W,  lastState.lastUpdate, currentUpdate),
         totalDailyConsumption_Wh:     this.aggregateDailyTotal(lastState.totalDailyConsumption_Wh,     statusJson.Consumption_W, lastState.lastUpdate, currentUpdate),
+        totalProduction_Wh:           this.aggregateDailyTotal(lastState.totalProduction_Wh,           statusJson.Production_W,  lastState.lastUpdate, currentUpdate),
         totalConsumption_Wh:          this.aggregateTotal(lastState.totalConsumption_Wh,               statusJson.Consumption_W, lastState.lastUpdate, currentUpdate),
         totalDailyGridFeedIn_Wh:      this.aggregateDailyTotal(lastState.totalDailyGridFeedIn_Wh,      grid_feed_in_W,           lastState.lastUpdate, currentUpdate),
         totalDailyGridConsumption_Wh: this.aggregateDailyTotal(lastState.totalDailyGridConsumption_Wh, grid_consumption_W,       lastState.lastUpdate, currentUpdate),
@@ -249,6 +226,7 @@ class BatteryDevice extends Homey.Device {
       };
 
       this.setCapabilityValue('measure_battery', +statusJson.USOC); // Percentage on battery
+      this.setCapabilityValue('meter_power', +(latestStateJson.FullChargeCapacity / 1000) * (statusJson.USOC/ 100)); 
       this.setCapabilityValue('production_capability', +statusJson.Production_W / 1000);
       this.setCapabilityValue('production_daily_capability', currentState.totalDailyProduction_Wh / 1000);
       this.setCapabilityValue('capacity_capability', +latestStateJson.FullChargeCapacity / 1000);
@@ -274,11 +252,9 @@ class BatteryDevice extends Homey.Device {
 
       this.setCapabilityValue('to_battery_capability', toBattery_W);
       this.setCapabilityValue('from_battery_capability', fromBattery_W);
-
-      // TODO: move this to metering device
       
       this.log("Emit data...")
-      this.homey.emit('metering_data_updated', currentState, statusJson);
+      this.homey.emit('sonnenBatterieUpdate', currentState, statusJson);
       this.log("Data emitted")
 
       this.setCapabilityValue('grid_feed_in_capability', grid_feed_in_W / 1000); // GridFeedIn_W positive: to grid
@@ -367,7 +343,7 @@ class BatteryDevice extends Homey.Device {
 
   // TODO: refactor to aggregate with and without
   private aggregateTotal(totalEnergy_Wh: number, currentPower_W: number, lastUpdate: Date, currentUpdate: Date): number {
-    var totalEnergyResult_Wh = totalEnergy_Wh ?? 0; 
+    var totalEnergyResult_Wh = totalEnergy_Wh ?? 0;
     var sampleIntervalMillis = currentUpdate.getTime() - lastUpdate.getTime(); // should be ~30000ms resp. polling frequency
     var sampleEnergy_Wh = (currentPower_W ?? 0) * (sampleIntervalMillis / 60 / 60 / 1000); // Wh
     totalEnergyResult_Wh += sampleEnergy_Wh;
@@ -380,5 +356,3 @@ class BatteryDevice extends Homey.Device {
   }
 
 }
-
-module.exports = BatteryDevice;

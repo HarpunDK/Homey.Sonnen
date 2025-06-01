@@ -1,8 +1,8 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "com.sonnen.battery",
-  "version": "1.5.0",
-  "compatibility": ">=12.3.0",
+  "version": "1.6.0",
+  "compatibility": ">=12.4.5",
   "sdk": 3,
   "platforms": [
     "local"
@@ -503,9 +503,34 @@
   },
   "drivers": [
     {
+      "platforms": [
+        "local"
+      ],
+      "connectivity": [
+        "lan"
+      ],
+      "images": {
+        "small": "/drivers/sonnenbatterie/assets/images/small.png",
+        "large": "/drivers/sonnenbatterie/assets/images/large.png",
+        "xlarge": "/drivers/sonnenbatterie/assets/images/xlarge.png"
+      },
+      "pair": [
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "navigation": {
+            "next": "add_devices"
+          }
+        },
+        {
+          "id": "add_devices",
+          "template": "add_devices"
+        }
+      ],
       "name": {
         "en": "sonnenBatterie",
-        "de": "sonnenBatterie"
+        "de": "sonnenBatterie",
+        "nl": "sonnenBatterie"
       },
       "class": "battery",
       "capabilities": [
@@ -533,57 +558,66 @@
         "button.reset_meter",
         "battery_charging_state",
         "meter_power.charged",
-        "meter_power.discharged"
+        "meter_power.discharged",
+        "meter_power"
       ],
       "capabilitiesOptions": {
         "button.reset_meter": {
           "maintenanceAction": true,
           "title": {
             "en": "Reset daily totals",
-            "de": "Tagessummen zurücksetzen"
+            "de": "Tagessummen zurücksetzen",
+            "nl": "Dagelijkse totalen resetten"
           },
           "desc": {
             "en": "Resets today's totals (kWh). This can not be restored.",
-            "de": "Setzt die heutigen Gesamtsummen (kWh) zurück. Dies kann nicht rückgängig gemacht werden."
+            "de": "Setzt die heutigen Gesamtsummen (kWh) zurück. Dies kann nicht rückgängig gemacht werden.",
+            "nl": "Reset de dagelijkse totalen (kWh). Dit kan niet worden hersteld."
           }
         },
         "meter_power.charged": {
           "title": {
             "en": "Charged Energy",
-            "de": "Geladene Energie"
+            "de": "Geladene Energie",
+            "nl": "Opgeladen Energie"
           }
         },
         "meter_power.discharged": {
           "title": {
             "en": "Discharged Energy",
-            "de": "Entladene Energie"
+            "de": "Entladene Energie",
+            "nl": "Ontladen Energie"
           }
         },
         "battery_charging_state": {
           "title": {
             "en": "Battery Charging State",
-            "de": "Batterie Ladezustand"
+            "de": "Batterie Ladezustand",
+            "nl": "Batterij Laadstatus"
           },
           "values": [
             {
               "id": "charging",
               "title": {
                 "en": "Charging",
-                "de": "Laden"
+                "de": "Laden",
+                "nl": "Opladen"
               }
             },
             {
               "id": "discharging",
               "title": {
                 "en": "Discharging",
-                "de": "Entladen"
+                "de": "Entladen",
+                "nl": "Ontladen"
               }
             },
             {
               "id": "idle",
               "title": {
                 "en": "Idle",
-                "de": "Im Leerlauf"
+                "de": "Im Leerlauf",
+                "nl": "Inactief"
               }
             }
           ]
@@ -597,29 +631,6 @@
         "meterPowerImportedCapability": "meter_power.charged",
         "meterPowerExportedCapability": "meter_power.discharged"
       },
-      "platforms": [
-        "local"
-      ],
-      "connectivity": [
-        "lan"
-      ],
-      "images": {
-        "small": "/drivers/sonnenbatterie/assets/images/small.png",
-        "large": "/drivers/sonnenbatterie/assets/images/large.png"
-      },
-      "pair": [
-        {
-          "id": "list_devices",
-          "template": "list_devices",
-          "navigation": {
-            "next": "add_devices"
-          }
-        },
-        {
-          "id": "add_devices",
-          "template": "add_devices"
-        }
-      ],
       "id": "sonnenbatterie",
       "settings": [
         {
@@ -660,34 +671,6 @@
       ]
     },
     {
-      "name": {
-        "en": "sonnenbatterie_meter"
-      },
-      "class": "sensor",
-      "capabilities": [
-        "measure_power",
-        "meter_power.imported",
-        "meter_power.exported"
-      ],
-      "capabilitiesOptions": {
-        "meter_power.imported": {
-          "title": {
-            "en": "Imported Energy",
-            "de": "Importierte Energie"
-          }
-        },
-        "meter_power.exported": {
-          "title": {
-            "en": "Exported Energy",
-            "de": "Exportierte Energie"
-          }
-        }
-      },
-      "energy": {
-        "cumulative": true,
-        "cumulativeImportedCapability": "meter_power.imported",
-        "cumulativeExportedCapability": "meter_power.exported"
-      },
       "platforms": [
         "local"
       ],
@@ -695,9 +678,9 @@
         "lan"
       ],
       "images": {
-        "small": "/drivers/sonnenbatterie_meter/assets/images/small.png",
-        "large": "/drivers/sonnenbatterie_meter/assets/images/large.png",
-        "xlarge": "/drivers/sonnenbatterie_meter/assets/images/xlarge.png"
+        "small": "/drivers/sonnenbatterie_gridmeter/assets/images/small.png",
+        "large": "/drivers/sonnenbatterie_gridmeter/assets/images/large.png",
+        "xlarge": "/drivers/sonnenbatterie_gridmeter/assets/images/xlarge.png"
       },
       "pair": [
         {
@@ -712,7 +695,139 @@
           "template": "add_devices"
         }
       ],
-      "id": "sonnenbatterie_meter"
+      "name": {
+        "en": "sonnenBatterie Grid",
+        "de": "sonnenBatterie Netz",
+        "nl": "sonnenBatterie Net"
+      },
+      "class": "sensor",
+      "capabilities": [
+        "measure_power",
+        "meter_power.imported",
+        "meter_power.exported"
+      ],
+      "capabilitiesOptions": {
+        "meter_power.imported": {
+          "title": {
+            "en": "Imported Energy",
+            "de": "Importierte Energie",
+            "nl": "Geïmporteerde Energie"
+          }
+        },
+        "meter_power.exported": {
+          "title": {
+            "en": "Exported Energy",
+            "de": "Exportierte Energie",
+            "nl": "Geëxporteerde Energie"
+          }
+        }
+      },
+      "energy": {
+        "cumulative": true,
+        "cumulativeImportedCapability": "meter_power.imported",
+        "cumulativeExportedCapability": "meter_power.exported"
+      },
+      "id": "sonnenbatterie_gridmeter"
+    },
+    {
+      "platforms": [
+        "local"
+      ],
+      "connectivity": [
+        "lan"
+      ],
+      "images": {
+        "small": "/drivers/sonnenbatterie_householdmeter/assets/images/small.png",
+        "large": "/drivers/sonnenbatterie_householdmeter/assets/images/large.png",
+        "xlarge": "/drivers/sonnenbatterie_householdmeter/assets/images/xlarge.png"
+      },
+      "pair": [
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "navigation": {
+            "next": "add_devices"
+          }
+        },
+        {
+          "id": "add_devices",
+          "template": "add_devices"
+        }
+      ],
+      "name": {
+        "en": "sonnenBatterie household",
+        "de": "sonnenBatterie Haushalt",
+        "nl": "sonnenBatterie Huishouden"
+      },
+      "class": "sensor",
+      "capabilities": [
+        "measure_power"
+      ],
+      "energy": {
+        "cumulative": true
+      },
+      "id": "sonnenbatterie_householdmeter"
+    },
+    {
+      "platforms": [
+        "local"
+      ],
+      "connectivity": [
+        "lan"
+      ],
+      "images": {
+        "small": "/drivers/sonnenbatterie_solarpanel/assets/images/small.png",
+        "large": "/drivers/sonnenbatterie_solarpanel/assets/images/large.png",
+        "xlarge": "/drivers/sonnenbatterie_solarpanel/assets/images/xlarge.png"
+      },
+      "pair": [
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "navigation": {
+            "next": "add_devices"
+          }
+        },
+        {
+          "id": "add_devices",
+          "template": "add_devices"
+        }
+      ],
+      "name": {
+        "en": "sonnenBatterie solar panel",
+        "de": "sonnenBatterie Solarmodul",
+        "nl": "sonnenBatterie Zonnepaneel"
+      },
+      "class": "solarpanel",
+      "capabilities": [
+        "measure_power",
+        "meter_power",
+        "meter_power.daily"
+      ],
+      "capabilitiesOptions": {
+        "measure_power": {
+          "title": {
+            "en": "Generated Power",
+            "de": "Energieproduktion",
+            "nl": "Opgewekte energie"
+          }
+        },
+        "meter_power": {
+          "title": {
+            "en": "Total production",
+            "de": "Gesamtproduktion",
+            "nl": "Totaal productie"
+          }
+        },
+        "meter_power.daily": {
+          "title": {
+            "en": "Total daily production",
+            "de": "Gesamte Tagesproduktion",
+            "nl": "Totaal dagelijkse productie"
+          }
+        }
+      },
+      "id": "sonnenbatterie_solarpanel"
     }
   ],
   "widgets": {
