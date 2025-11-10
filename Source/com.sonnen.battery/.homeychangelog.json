@@ -3,7 +3,7 @@
     "en": "Initial release"
   },
   "1.0.1": {
-    "en": "Added Time-Of-Use where you specify StartTime and Hours instead of EndTime. Specify Hours from StartTime instead of EndTime. "
+    "en": "Added Time-of-Use where you specify StartTime and Hours instead of EndTime. Specify Hours from StartTime instead of EndTime. "
   },
   "1.0.2": {
     "en": "A lot of capabilities added and more configuration."
@@ -115,5 +115,9 @@
   },
   "2.1.0": {
     "en": "Add setpoint charge/discharge cards especially useful for operating mode 'manual'. More refactorings, validations and localizations as well as support for VSCode debugging."
+  },
+  "2.2.0": {
+    "en": "Add localization for DA and NL automatically using AI. Please help to improve translations."
   }
+
 }
