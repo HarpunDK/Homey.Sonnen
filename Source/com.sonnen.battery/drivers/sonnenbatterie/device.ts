@@ -395,6 +395,8 @@ export class BatteryDevice extends SonnenDevice {
       // Set cycle count capability only when we actually fetch battery data
       if (batteryJson) {
         this.setCapabilityValue('total_cyclecount_capability', batteryJson.cyclecount);
+        // Add cycle count snapshot for averaging calculations
+        currentState.addCycleCountSnapshot(currentUpdate, batteryJson.cyclecount);
       }
  
       /*

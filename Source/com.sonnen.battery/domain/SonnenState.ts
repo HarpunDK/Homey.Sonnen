@@ -1,3 +1,10 @@
+import { RingBuffer } from 'ring-buffer-ts';
+
+interface CycleCountSnapshot {
+  timestamp: Date;
+  cycleCount: number;
+}
+
 export class SonnenState {
   lastUpdate: Date | null;
   lastBatteryDataUpdate: Date | null;
@@ -19,6 +26,8 @@ export class SonnenState {
   todayMaxGridConsumption_Wh: number;
   todayMaxProduction_Wh: number;
   total_cycleCount: number;
+  private cycleCount7DayBuffer: RingBuffer<CycleCountSnapshot>;
+  private cycleCount30DayBuffer: RingBuffer<CycleCountSnapshot>;
 
   constructor(initialState?: Partial<SonnenState>) {
     this.lastUpdate = initialState?.lastUpdate || null;
@@ -41,9 +50,57 @@ export class SonnenState {
     this.todayMaxGridConsumption_Wh = initialState?.todayMaxGridConsumption_Wh || 0;
     this.todayMaxProduction_Wh = initialState?.todayMaxProduction_Wh || 0;
     this.total_cycleCount = initialState?.total_cycleCount || 0;
+    
+    // Initialize ring buffers for cycle count tracking
+    // 7 days * 24 hours = 168 entries
+    this.cycleCount7DayBuffer = new RingBuffer<CycleCountSnapshot>(168);
+    // 30 days * 24 hours = 720 entries
+    this.cycleCount30DayBuffer = new RingBuffer<CycleCountSnapshot>(720);
   }
 
   updateState(newState: Partial<SonnenState>) {
     Object.assign(this, newState);
+  }
+
+  addCycleCountSnapshot(timestamp: Date, cycleCount: number): void {
+    const snapshot: CycleCountSnapshot = { timestamp, cycleCount };
+    this.cycleCount7DayBuffer.add(snapshot);
+    this.cycleCount30DayBuffer.add(snapshot);
+  }
+
+  get7DayAverageCycleCountRate(): number | null {
+    return this.calculateAverageCycleCountRate(this.cycleCount7DayBuffer);
+  }
+
+  get30DayAverageCycleCountRate(): number | null {
+    return this.calculateAverageCycleCountRate(this.cycleCount30DayBuffer);
+  }
+
+  private calculateAverageCycleCountRate(buffer: RingBuffer<CycleCountSnapshot>): number | null {
+    // Check if we have at least 2 entries
+    if (buffer.getSize() < 2) {
+      return null;
+    }
+    
+    // Use the first and last snapshots to calculate the rate
+    const firstSnapshot = buffer.getFirst();
+    const lastSnapshot = buffer.getLast();
+    
+    // Handle case where first or last snapshot might be undefined
+    if (!firstSnapshot || !lastSnapshot) {
+      return null;
+    }
+    
+    // Calculate time difference in days
+    const timeDiffMs = lastSnapshot.timestamp.getTime() - firstSnapshot.timestamp.getTime();
+    const timeDiffDays = timeDiffMs / (1000 * 60 * 60 * 24);
+    
+    if (timeDiffDays <= 0) {
+      return null;
+    }
+    
+    // Calculate rate (cycles per day)
+    const cycleDiff = lastSnapshot.cycleCount - firstSnapshot.cycleCount;
+    return cycleDiff / timeDiffDays;
   }
 }
