@@ -76,9 +76,7 @@ export class SonnenState {
       stateCopy.lastUpdate = new Date(stateCopy.lastUpdate);
     }
     
-    if (stateCopy.lastBatteryDataUpdate && typeof stateCopy.lastBatteryDataUpdate === 'string') {
-      stateCopy.lastBatteryDataUpdate = new Date(stateCopy.lastBatteryDataUpdate);
-    }
+    stateCopy.lastBatteryDataUpdate = null; // transient property, do not restore
     
     // Handle ring buffers that may contain CycleCountSnapshot objects with string timestamps
     if (stateCopy.cycleCount7DayBuffer && stateCopy.cycleCount7DayBuffer.buffer) {
