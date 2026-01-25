@@ -1,7 +1,7 @@
 {
   "type": "number",
   "title": {
-    "en": "Total Cycle Count",
+    "en": "Total cycle count",
     "de": "Gesamtzyklenzahl",
     "da": "Samlet cyklus antal",
     "nl": "Totaal aantal cycli"

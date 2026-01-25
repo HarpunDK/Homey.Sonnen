@@ -197,7 +197,9 @@ export class BatteryDevice extends SonnenDevice {
       'operating_mode_capability',
       'prognosis_charging_capability',
       'state_core_control_module_capability',
-      'total_cyclecount_capability'  
+      'total_cyclecount_capability',
+      'cyclecount_7day_rate_capability',
+      'cyclecount_30day_rate_capability'
     ];
 
     if (this.isEnergyFullySupported()) {
@@ -397,6 +399,18 @@ export class BatteryDevice extends SonnenDevice {
         this.setCapabilityValue('total_cyclecount_capability', batteryJson.cyclecount);
         // Add cycle count snapshot for averaging calculations
         currentState.addCycleCountSnapshot(currentUpdate, batteryJson.cyclecount);
+        
+        // Set the 7-day and 30-day average cycle count rates
+        const cycleCount7DayRate = currentState.get7DayAverageCycleCountRate();
+        const cycleCount30DayRate = currentState.get30DayAverageCycleCountRate();
+        
+        if (cycleCount7DayRate !== null) {
+          this.setCapabilityValue('cyclecount_7day_rate_capability', cycleCount7DayRate);
+        }
+        
+        if (cycleCount30DayRate !== null) {
+          this.setCapabilityValue('cyclecount_30day_rate_capability', cycleCount30DayRate);
+        }
       }
  
       /*

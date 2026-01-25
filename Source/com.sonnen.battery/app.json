@@ -989,6 +989,8 @@
         "from_battery_total_capability",
         "online_capability",
         "total_cyclecount_capability",
+        "cyclecount_7day_rate_capability",
+        "cyclecount_30day_rate_capability",
         "number_battery_capability",
         "operating_mode_capability",
         "prognosis_charging_capability",
@@ -1554,6 +1556,48 @@
       "insights": true,
       "icon": "/assets/images/svg/electricity-home-svgrepo-com_sum.svg"
     },
+    "cyclecount_30day_rate_capability": {
+      "type": "number",
+      "title": {
+        "en": "⌀ Cycle rate (30d)",
+        "de": "⌀ Zyklusrate (30d)",
+        "da": "⌀ cyklusrate (30d)",
+        "nl": "⌀ cyclussnelheid (30d)"
+      },
+      "uiComponent": "sensor",
+      "getable": true,
+      "units": {
+        "en": "cycles/d",
+        "de": "Zyklen/d",
+        "da": "cyklus/d",
+        "nl": "cycli/d"
+      },
+      "min": 0,
+      "decimals": 3,
+      "insights": true,
+      "icon": "/assets/images/svg/avg_cyclecount_rate_30d.svg"
+    },
+    "cyclecount_7day_rate_capability": {
+      "type": "number",
+      "title": {
+        "en": "⌀ Cycle rate (7d)",
+        "de": "⌀ Zyklusrate (7d)",
+        "da": "⌀ cyklusrate (7d)",
+        "nl": "⌀ cyclussnelheid (7d)"
+      },
+      "uiComponent": "sensor",
+      "getable": true,
+      "units": {
+        "en": "cycles/d",
+        "de": "Zyklen/d",
+        "da": "cyklus/d",
+        "nl": "cycli/d"
+      },
+      "min": 0,
+      "decimals": 3,
+      "insights": true,
+      "icon": "/assets/images/svg/avg_cyclecount_rate_7d.svg"
+    },
     "eclipse_capability": {
       "type": "string",
       "title": {
@@ -2007,7 +2051,7 @@
     "total_cyclecount_capability": {
       "type": "number",
       "title": {
-        "en": "Total Cycle Count",
+        "en": "Total cycle count",
         "de": "Gesamtzyklenzahl",
         "da": "Samlet cyklus antal",
         "nl": "Totaal aantal cycli"
