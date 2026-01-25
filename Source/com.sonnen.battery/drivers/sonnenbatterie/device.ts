@@ -11,6 +11,7 @@ export class BatteryDevice extends SonnenDevice {
   private updateIntervalId: NodeJS.Timeout | undefined;
   private readonly batteryDateUpdateInterval = 3600; // 1 hour in seconds
 
+
   async onInit() {
     super.onInit();
 
@@ -22,7 +23,8 @@ export class BatteryDevice extends SonnenDevice {
     let storedState: SonnenState;
     try {
       this.log('Retrieving stored state...');
-      storedState = this.homey.settings.get('deviceState') || this.state;
+      const rawStoredState = this.homey.settings.get('deviceState') || this.state;
+      storedState = SonnenState.fromObject(rawStoredState);
     } catch (e) {
       this.log('Failed to retrieve stored state, use new state', e);
       storedState = this.state;

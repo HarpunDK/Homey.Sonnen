@@ -58,6 +58,50 @@ export class SonnenState {
     this.cycleCount30DayBuffer = new RingBuffer<CycleCountSnapshot>(720);
   }
 
+  /**
+   * Create a SonnenState instance from a plain object, properly deserializing Date objects
+   * @param obj Plain object with potential string dates
+   * @returns Properly deserialized SonnenState instance
+   */
+  static fromObject(obj: any): SonnenState {
+    if (!obj) {
+      return new SonnenState();
+    }
+    
+    // Create a deep copy to avoid modifying the original
+    const stateCopy = JSON.parse(JSON.stringify(obj));
+    
+    // Convert date strings back to Date objects
+    if (stateCopy.lastUpdate && typeof stateCopy.lastUpdate === 'string') {
+      stateCopy.lastUpdate = new Date(stateCopy.lastUpdate);
+    }
+    
+    if (stateCopy.lastBatteryDataUpdate && typeof stateCopy.lastBatteryDataUpdate === 'string') {
+      stateCopy.lastBatteryDataUpdate = new Date(stateCopy.lastBatteryDataUpdate);
+    }
+    
+    // Handle ring buffers that may contain CycleCountSnapshot objects with string timestamps
+    if (stateCopy.cycleCount7DayBuffer && stateCopy.cycleCount7DayBuffer.buffer) {
+      for (let i = 0; i < stateCopy.cycleCount7DayBuffer.buffer.length; i++) {
+        const snapshot = stateCopy.cycleCount7DayBuffer.buffer[i];
+        if (snapshot && snapshot.timestamp && typeof snapshot.timestamp === 'string') {
+          snapshot.timestamp = new Date(snapshot.timestamp);
+        }
+      }
+    }
+    
+    if (stateCopy.cycleCount30DayBuffer && stateCopy.cycleCount30DayBuffer.buffer) {
+      for (let i = 0; i < stateCopy.cycleCount30DayBuffer.buffer.length; i++) {
+        const snapshot = stateCopy.cycleCount30DayBuffer.buffer[i];
+        if (snapshot && snapshot.timestamp && typeof snapshot.timestamp === 'string') {
+          snapshot.timestamp = new Date(snapshot.timestamp);
+        }
+      }
+    }
+    
+    return new SonnenState(stateCopy);
+  }
+
   updateState(newState: Partial<SonnenState>) {
     Object.assign(this, newState);
   }
