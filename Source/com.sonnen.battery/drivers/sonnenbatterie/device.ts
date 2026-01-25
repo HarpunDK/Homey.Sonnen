@@ -195,7 +195,8 @@ export class BatteryDevice extends SonnenDevice {
       'capacity_remaining_capability',
       'operating_mode_capability',
       'prognosis_charging_capability',
-      'state_core_control_module_capability'
+      'state_core_control_module_capability',
+      'total_cyclecount_capability'  
     ];
 
     if (this.isEnergyFullySupported()) {
@@ -251,6 +252,7 @@ export class BatteryDevice extends SonnenDevice {
       const latestDataJson = await client.getLatestData();
       const statusJson = await client.getStatus();
       const configurations = await client.getConfigurations();
+      const batteryJson = await client.getBattery();
 
       // update device's batteries to actual number of internal batteries
       const numberBatteries = +latestDataJson.ic_status.nrbatterymodules;
@@ -325,6 +327,7 @@ export class BatteryDevice extends SonnenDevice {
         todayMaxGridFeedIn_Wh,
         todayMaxGridConsumption_Wh,
         todayMaxProduction_Wh,
+        total_cycleCount: batteryJson.cyclecount,
       });
 
       this.log("Emitting data update for other devices...");
@@ -380,6 +383,9 @@ export class BatteryDevice extends SonnenDevice {
       const prognosisChargingMode = prognosisCharging === "1";
       this.setCapabilityValue('prognosis_charging_capability', prognosisChargingMode);
       this.setSettings({ 'prognosis_charging': prognosisChargingMode });
+      
+      // Set cycle count capability
+      this.setCapabilityValue('total_cyclecount_capability', batteryJson.cyclecount);
  
       /*
       if (Math.random() < 0.5) {
