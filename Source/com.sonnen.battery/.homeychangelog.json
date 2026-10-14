@@ -262,5 +262,11 @@
     "de": "Zyklusrate seit Installationsdatum. Upgrade auf Node.js 22. Migriert von Axios zu nativer fetch API. Erfordert Homey v12.9.0 oder höher.",
     "da": "Cyklusrate siden installationsdato. Opgraderet til Node.js 22. Migreret fra Axios til native fetch API. Kræver Homey v12.9.0 eller nyere.",
     "nl": "Cyclus snelheid sinds installatiedatum. Geüpgraded naar Node.js 22. Gemigreerd van Axios naar native fetch API. Vereist Homey v12.9.0 of hoger."
+  },
+  "2.5.1": {
+    "en": "Fix battery capacity: use the sonnenBatterie's official configuration values.",
+    "de": "Korrektur der Batteriekapazität: Nutzung der offiziellen Konfigurationswerte der sonnenBatterie.",
+    "da": "Ret batterikapacitet: Brug de officielle konfigurationsværdier fra sonnenBatterie.",
+    "nl": "Fix batterijcapaciteit: gebruik de officiële configuratiewaarden van de sonnenBatterie."
   }
 }

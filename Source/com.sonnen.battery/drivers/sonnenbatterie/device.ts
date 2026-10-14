@@ -374,9 +374,18 @@ export class BatteryDevice extends SonnenDevice {
       this.setCapabilityValue('to_battery_total_capability', currentState.totalToBattery_Wh / 1000);
       this.setCapabilityValue('from_battery_total_capability', currentState.totalFromBattery_Wh / 1000);
 
-      const remaining_energy_Wh = +latestDataJson.FullChargeCapacity * (statusJson.USOC / 100);
-      this.setCapabilityValue('capacity_remaining_capability', remaining_energy_Wh / 1000);
-      this.setCapabilityValue('capacity_capability', +latestDataJson.FullChargeCapacity / 1000);
+      // Capacity: use sonnenBatterie's official values (same as sonnen app/dashboard).
+      // Do NOT use latestDataJson.FullChargeCapacity here: despite the API spec claiming
+      // "Wh", real firmware returns the Ah value x 100, and BMS Ah/Wh fields are ~2x
+      // inflated on some firmware generations. The official capacity label is derived
+      // from the configuration values (verified against the sonnen dashboard), and the
+      // official SoC is USOC (RSOC is the internal BMS SoC and differs when a backup
+      // buffer is configured).
+      const totalCapacity_Wh = this.computeTotalCapacity_Wh(configurationsJson, latestDataJson, batteryJson);
+      if (totalCapacity_Wh > 0) {
+        this.setCapabilityValue('capacity_capability', totalCapacity_Wh / 1000);
+        this.setCapabilityValue('capacity_remaining_capability', totalCapacity_Wh * (+statusJson.USOC / 100) / 1000);
+      }
 
       let chargingState: string;
       if (statusJson.Pac_total_W < 0) {
@@ -478,6 +487,19 @@ export class BatteryDevice extends SonnenDevice {
 
   private isNewDay(currentUpdate: Date, lastUpdate: Date) {
     return currentUpdate.getDay() !== lastUpdate.getDay();
+  }
+
+  private computeTotalCapacity_Wh(configurationsJson: any, latestDataJson: any, batteryJson: any): number {
+    const moduleCount = +latestDataJson.ic_status.nrbatterymodules;
+    const marketingCapacity_Wh = +configurationsJson['CM_MarketingModuleCapacity'];
+    if (marketingCapacity_Wh > 0 && moduleCount > 0) {
+      return marketingCapacity_Wh * moduleCount;
+    }
+    // Fallback for units without marketing values: BMS values (reliable on legacy firmware)
+    if (batteryJson && +batteryJson.fullchargecapacitywh > 0 && moduleCount > 0) {
+      return +batteryJson.fullchargecapacitywh * moduleCount;
+    }
+    return 0;
   }
 
   public async refreshState() {
